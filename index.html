@@ -84,6 +84,17 @@ body{letter-spacing:.1px}
 .tx small{color:var(--mute);font-size:13px}
 .tool i{color:var(--mute);font-style:normal;font-size:24px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+:root{--bg:#faf6f4;--card:#fffdfc;--ink:#3d3335;--mute:#8d7f80;--line:#efe4e1;--p1:#b07a73;--p2:#8c9bab;--p3:#c07a6c;--p4:#bfa06a;--soft:#f6ecea}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1415;--card:#251c1e;--ink:#f3e8e8;--mute:#b09fa1;--line:#3b2d30;--soft:#2e2326;--p1:#d4a39a;--p2:#a9b6c4;--p3:#e0a095;--p4:#d6bb86}.btn:not(.ghost),.tabs button.on{color:#1a1415}}
+:root[data-theme="dark"]{--bg:#1a1415;--card:#251c1e;--ink:#f3e8e8;--mute:#b09fa1;--line:#3b2d30;--soft:#2e2326;--p1:#d4a39a;--p2:#a9b6c4;--p3:#e0a095;--p4:#d6bb86}
+.hero{background:linear-gradient(135deg,#f7e9e6,#ecd2cd);color:#3d3335;box-shadow:0 8px 20px rgba(176,122,115,.15)}
+@media (prefers-color-scheme:dark){.hero{background:linear-gradient(135deg,#3b2b2e,#55393d);color:#f3e8e8}}
+.hero h1,.hero .big,.trip .t{font-weight:700}
+.cost{font-weight:700}
+.card{box-shadow:0 1px 3px rgba(61,51,53,.06)}
+.btn{box-shadow:none}
+.tools{box-shadow:0 1px 3px rgba(61,51,53,.06)}
+.tabs button.on{box-shadow:0 1px 3px rgba(20,30,50,.15)}
 </style>
 </head>
 <body>
@@ -103,8 +114,8 @@ const OLDM={'步行':'Walk','地铁':'Metro','巴士':'Bus','火车':'Train','�
 const OLDC={'餐饮':'Food','购物':'Souvenirs','门票':'Other','其他':'Other'};
 const ECAT=['Flights','Accommodation','Food','Souvenirs','Other'];
 const CI={Flights:'✈️',Accommodation:'🏨',Food:'🍜',Souvenirs:'🎁',Shopping:'🛍️',Attractions:'🎟️',Transport:'🚆',Other:'📦'};
-const CC={Flights:'#6c5ce7',Accommodation:'#00b8a9',Food:'#ff9f43',Souvenirs:'#ff6eb4',Shopping:'#e84393',Attractions:'#48a9ff',Transport:'#2ecc71',Other:'#a29bfe'};
-const DC=['#ff6b6b','#ff9f43','#f4b400','#1dd1a1','#00b8d4','#5f7cff','#a55eea','#ff6eb4'];
+const CC={Flights:'#8c9bab',Accommodation:'#b07a73',Food:'#bfa06a',Souvenirs:'#a8788a',Shopping:'#c0846f',Attractions:'#9a8a99',Transport:'#8aa08f',Other:'#aea3a1'};
+const DC=['#b07a73','#8c9bab','#bfa06a','#9a8a99','#8aa08f','#c0846f','#a8788a','#7f95a3'];
 let trips=[],rates={},cur=null,tab='plan',target=null;
 try{trips=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){}
 try{rates=JSON.parse(localStorage.getItem(RK)||'{}')}catch(e){}
@@ -292,9 +303,9 @@ function home(){
   trips.forEach((t,i)=>{
     const s=sums(t).total;
     h+='<div class="card trip" style="--c:'+DC[i%DC.length]+'" onclick="open_(\''+t.id+'\')"><div class="t">'+flag(t)+' '+esc(t.name)+'</div><div class="mute">'+esc(t.dest||t.country)+' · '+t.days+' days'+(t.start?' · '+range(t):'')+'</div>'+
-    '<div class="two"><span class="pill" style="--c:#6c5ce7">'+money(t,s)+'</span>'+(t.code!=='SGD'?'<span class="pill" style="--c:#00b8a9">≈ '+sgd(t,s)+'</span>':'')+'</div></div>';
+    '<div class="two"><span class="pill" style="--c:#b07a73">'+money(t,s)+'</span>'+(t.code!=='SGD'?'<span class="pill" style="--c:#8c9bab">≈ '+sgd(t,s)+'</span>':'')+'</div></div>';
   });
-  return h+'<button class="btn w" onclick="tripForm()">＋ New trip</button><div class="tlabel">Settings &amp; data</div><div class="tools"><button class="tool" onclick="rateForm()"><span class="ti" style="--c:#00b8a9">💱</span><span class="tx"><b>Exchange rates</b><small>Monthly average to SGD</small></span><i>›</i></button><button class="tool" onclick="backup()"><span class="ti" style="--c:#6c5ce7">⬇️</span><span class="tx"><b>Back up data</b><small>Save all trips to a file</small></span><i>›</i></button><button class="tool" onclick="restore()"><span class="ti" style="--c:#ff9f43">⬆️</span><span class="tx"><b>Restore data</b><small>Load trips from a backup file</small></span><i>›</i></button></div>';
+  return h+'<button class="btn w" onclick="tripForm()">＋ New trip</button><div class="tlabel">Settings &amp; data</div><div class="tools"><button class="tool" onclick="rateForm()"><span class="ti" style="--c:#8c9bab">💱</span><span class="tx"><b>Exchange rates</b><small>Monthly average to SGD</small></span><i>›</i></button><button class="tool" onclick="backup()"><span class="ti" style="--c:#b07a73">⬇️</span><span class="tx"><b>Back up data</b><small>Save all trips to a file</small></span><i>›</i></button><button class="tool" onclick="restore()"><span class="ti" style="--c:#bfa06a">⬆️</span><span class="tx"><b>Restore data</b><small>Load trips from a backup file</small></span><i>›</i></button></div>';
 }
 function tripView(t){
   let h='<div class="top"><button class="ic" onclick="cur=null;draw()">‹ Back</button><h1>'+flag(t)+' '+esc(t.name)+'</h1><button class="ic" onclick="tripForm(T())">Edit</button></div>';
