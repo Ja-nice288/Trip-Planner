@@ -80,6 +80,7 @@ const MI={Walk:'🚶',Metro:'🚇',Bus:'🚌',Train:'🚆',Taxi:'🚕',Flight:'�
 const OLDM={'步行':'Walk','地铁':'Metro','巴士':'Bus','火车':'Train','打车':'Taxi','飞机':'Flight','自驾':'Drive','轮渡':'Ferry','其他':'Other'};
 const OLDC={'餐饮':'Food','购物':'Souvenirs','门票':'Other','其他':'Other'};
 const ECAT=['Flights','Accommodation','Food','Souvenirs','Other'];
+const CI={Flights:'✈️',Accommodation:'🏨',Food:'🍜',Souvenirs:'🎁',Shopping:'🛍️',Attractions:'🎟️',Transport:'🚆',Other:'📦'};
 const CC={Flights:'#6c5ce7',Accommodation:'#00b8a9',Food:'#ff9f43',Souvenirs:'#ff6eb4',Shopping:'#e84393',Attractions:'#48a9ff',Transport:'#2ecc71',Other:'#a29bfe'};
 const DC=['#ff6b6b','#ff9f43','#f4b400','#1dd1a1','#00b8d4','#5f7cff','#a55eea','#ff6eb4'];
 let trips=[],rates={},cur=null,tab='plan',target=null;
@@ -119,7 +120,7 @@ function form(title,fields,ok,del){
   let h='<h2 style="margin:0">'+esc(title)+'</h2>';
   fields.forEach((f,i)=>{
     h+='<label>'+f.l+'</label>';const v=f.v==null?'':f.v;
-    if(f.t==='select')h+='<select id="f'+i+'">'+f.o.map(o=>'<option'+(o===v?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select>';
+    if(f.t==='select')h+='<select id="f'+i+'">'+f.o.map(o=>'<option value="'+esc(o)+'"'+(o===v?' selected':'')+'>'+(f.ic&&CI[o]?CI[o]+' ':'')+esc(o)+'</option>').join('')+'</select>';
     else if(f.t==='area')h+='<textarea id="f'+i+'" rows="2">'+esc(v)+'</textarea>';
     else h+='<input id="f'+i+'" type="'+(f.t||'text')+'" value="'+esc(v)+'"'+(f.t==='number'?' inputmode="decimal" step="any"':'')+' placeholder="'+esc(f.p||'')+'">';
   });
@@ -180,7 +181,7 @@ function hotelForm(i){
 function expForm(i){
   const t=T(),e=i==null?null:t.exp[i];
   form(e?'Edit expense':'Add expense',[
-    {l:'Category',t:'select',o:ECAT,v:e&&e.cat||'Food'},
+    {l:'Category',t:'select',ic:1,o:ECAT,v:e&&e.cat||'Food'},
     {l:'Description',v:e&&e.name,p:'e.g. KL–Tokyo flights'},{l:'Amount ('+t.code+')',t:'number',v:e&&e.amt}
   ],r=>{
     if(!r[1]||!r[2]){alert('Please enter a description and amount');return false}
@@ -211,6 +212,7 @@ function shrink(f){return new Promise((ok,no)=>{
 function open_(id){cur=id;tab='plan';draw();scrollTo(0,0)}
 function setTab(x){tab=x;draw()}
 /* backup & restore */
+function restore(){document.getElementById('file3').click()}
 async function backup(){
  const name='trip-planner-backup-'+fmt(new Date())+'.json',blob=new Blob([JSON.stringify({trips,rates})],{type:'application/json'}),f=new File([blob],name,{type:'application/json'});
  try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return}}catch(e){if(e&&e.name==='AbortError')return}
@@ -270,7 +272,7 @@ function home(){
     h+='<div class="card trip" style="--c:'+DC[i%DC.length]+'" onclick="open_(\''+t.id+'\')"><div class="t">'+flag(t)+' '+esc(t.name)+'</div><div class="mute">'+esc(t.dest||t.country)+' · '+t.days+' days'+(t.start?' · '+range(t):'')+'</div>'+
     '<div class="two"><span class="pill" style="--c:#6c5ce7">'+money(t,s)+'</span>'+(t.code!=='SGD'?'<span class="pill" style="--c:#00b8a9">≈ '+sgd(t,s)+'</span>':'')+'</div></div>';
   });
-  return h+'<button class="btn w" onclick="tripForm()">＋ New trip</button><button class="btn ghost w" style="margin-top:8px" onclick="rateForm()">💱 Exchange rates (monthly average → SGD)</button><button class="btn ghost w" style="margin-top:8px" onclick="backup()">⬇️ Back up my data</button><button class="btn ghost w" style="margin-top:8px" onclick="$('#file3').click()">⬆️ Restore from backup</button>';
+  return h+'<button class="btn w" onclick="tripForm()">＋ New trip</button><button class="btn ghost w" style="margin-top:8px" onclick="rateForm()">💱 Exchange rates (monthly average → SGD)</button><button class="btn ghost w" style="margin-top:8px" onclick="backup()">⬇️ Back up my data</button><button class="btn ghost w" style="margin-top:8px" onclick="restore()">⬆️ Restore from backup</button>';
 }
 function tripView(t){
   let h='<div class="top"><button class="ic" onclick="cur=null;draw()">‹ Back</button><h1>'+flag(t)+' '+esc(t.name)+'</h1><button class="ic" onclick="tripForm(T())">Edit</button></div>';
@@ -313,11 +315,11 @@ function costV(t){
   let h='<div class="hero"><div class="sub">Total spent</div><div class="big">'+money(t,s.total)+'</div>'+(t.code!=='SGD'?'<div class="sub">≈ '+sgd(t,s.total)+' · 1 '+t.code+' = S$'+rate(t.code)+'</div>':'')+'<div class="sub">'+money(t,s.total/t.days)+' per day</div></div><div class="card">';
   Object.keys(CC).forEach(k=>{
     const pc=s.total?s[k]/s.total*100:0;
-    h+='<div style="margin-bottom:10px;--c:'+CC[k]+'"><div style="display:flex;justify-content:space-between"><span>'+k+'</span><b>'+money(t,s[k])+'</b></div><div class="bar"><i style="width:'+pc+'%"></i></div></div>';
+    h+='<div style="margin-bottom:10px;--c:'+CC[k]+'"><div style="display:flex;justify-content:space-between"><span>'+(CI[k]||'')+' '+k+'</span><b>'+money(t,s[k])+'</b></div><div class="bar"><i style="width:'+pc+'%"></i></div></div>';
   });
   h+='</div><div class="card"><b>Expenses</b>';
   if(!t.exp.length)h+='<div class="mute" style="margin-top:6px">Flights, food, souvenirs and more go here. Hotels and places are counted automatically.</div>';
-  t.exp.forEach((e,i)=>h+='<div class="row" onclick="expForm('+i+')"><span>'+esc(e.name)+' <span class="pill" style="--c:'+(CC[e.cat]||CC.Other)+'">'+esc(e.cat)+'</span></span><b>'+money(t,+e.amt)+'</b></div>');
+  t.exp.forEach((e,i)=>h+='<div class="row" onclick="expForm('+i+')"><span>'+esc(e.name)+' <span class="pill" style="--c:'+(CC[e.cat]||CC.Other)+'">'+(CI[e.cat]||'')+' '+esc(e.cat)+'</span></span><b>'+money(t,+e.amt)+'</b></div>');
   return h+'</div><button class="btn w" onclick="expForm()">＋ Add expense</button>';
 }
 draw();
