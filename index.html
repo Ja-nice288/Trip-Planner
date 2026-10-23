@@ -62,6 +62,28 @@ input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--
 .chk.on{background:var(--p2);color:#fff}
 .thumb{width:64px;height:64px;object-fit:cover;border-radius:12px;flex:none}
 .done{text-decoration:line-through;opacity:.55}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{letter-spacing:.1px}
+.hero{box-shadow:0 14px 30px rgba(108,92,231,.28)}
+.card{box-shadow:0 4px 14px rgba(43,35,80,.06);transition:transform .18s ease,box-shadow .18s ease}
+.trip:active{transform:scale(.985);box-shadow:0 2px 8px rgba(43,35,80,.1)}
+.btn{transition:transform .15s ease,filter .15s ease;box-shadow:0 6px 16px rgba(108,92,231,.25)}
+.btn.ghost{box-shadow:none}
+.btn:active{transform:scale(.98);filter:brightness(.95)}
+.tabs button{transition:background .2s ease,color .2s ease}
+#mask{backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+#sheet{animation:up .25s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.tlabel{margin:22px 4px 8px;font-weight:700;color:var(--mute);font-size:14px}
+.tools{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 8px 22px rgba(108,92,231,.1)}
+.tool{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:13px 14px;text-align:left;transition:background .15s ease}
+.tool:last-child{border:0}
+.tool:active{background:var(--soft)}
+.ti{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:19px;flex:none;background:color-mix(in srgb,var(--c) 18%,transparent)}
+.tx{flex:1;display:flex;flex-direction:column;line-height:1.3}
+.tx small{color:var(--mute);font-size:13px}
+.tool i{color:var(--mute);font-style:normal;font-size:24px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -272,7 +294,7 @@ function home(){
     h+='<div class="card trip" style="--c:'+DC[i%DC.length]+'" onclick="open_(\''+t.id+'\')"><div class="t">'+flag(t)+' '+esc(t.name)+'</div><div class="mute">'+esc(t.dest||t.country)+' · '+t.days+' days'+(t.start?' · '+range(t):'')+'</div>'+
     '<div class="two"><span class="pill" style="--c:#6c5ce7">'+money(t,s)+'</span>'+(t.code!=='SGD'?'<span class="pill" style="--c:#00b8a9">≈ '+sgd(t,s)+'</span>':'')+'</div></div>';
   });
-  return h+'<button class="btn w" onclick="tripForm()">＋ New trip</button><button class="btn ghost w" style="margin-top:8px" onclick="rateForm()">💱 Exchange rates (monthly average → SGD)</button><button class="btn ghost w" style="margin-top:8px" onclick="backup()">⬇️ Back up my data</button><button class="btn ghost w" style="margin-top:8px" onclick="restore()">⬆️ Restore from backup</button>';
+  return h+'<button class="btn w" onclick="tripForm()">＋ New trip</button><div class="tlabel">Settings &amp; data</div><div class="tools"><button class="tool" onclick="rateForm()"><span class="ti" style="--c:#00b8a9">💱</span><span class="tx"><b>Exchange rates</b><small>Monthly average to SGD</small></span><i>›</i></button><button class="tool" onclick="backup()"><span class="ti" style="--c:#6c5ce7">⬇️</span><span class="tx"><b>Back up data</b><small>Save all trips to a file</small></span><i>›</i></button><button class="tool" onclick="restore()"><span class="ti" style="--c:#ff9f43">⬆️</span><span class="tx"><b>Restore data</b><small>Load trips from a backup file</small></span><i>›</i></button></div>';
 }
 function tripView(t){
   let h='<div class="top"><button class="ic" onclick="cur=null;draw()">‹ Back</button><h1>'+flag(t)+' '+esc(t.name)+'</h1><button class="ic" onclick="tripForm(T())">Edit</button></div>';
