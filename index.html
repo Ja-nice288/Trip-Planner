@@ -69,6 +69,7 @@ input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--
 <div id="mask"><div id="sheet"></div></div>
 <input type="file" id="file" accept="image/*" multiple hidden>
 <input type="file" id="file2" accept="image/*" hidden>
+<input type="file" id="file3" accept=".json,application/json" hidden>
 <div id="toast"></div>
 <script>
 const KEY='trip-planner-v1',RK='trip-planner-rates';
@@ -209,6 +210,16 @@ function shrink(f){return new Promise((ok,no)=>{
   im.onerror=no;im.src=u})}
 function open_(id){cur=id;tab='plan';draw();scrollTo(0,0)}
 function setTab(x){tab=x;draw()}
+/* backup & restore */
+async function backup(){
+ const name='trip-planner-backup-'+fmt(new Date())+'.json',blob=new Blob([JSON.stringify({trips,rates})],{type:'application/json'}),f=new File([blob],name,{type:'application/json'});
+ try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return}}catch(e){if(e&&e.name==='AbortError')return}
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();
+}
+$('#file3').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+ try{const d=JSON.parse(await f.text());if(!Array.isArray(d.trips))throw 0;
+  d.trips.forEach(x=>{const i=trips.findIndex(t=>t.id===x.id);if(i>=0)trips[i]=x;else trips.push(x)});
+  Object.assign(rates,d.rates||{});trips.forEach(t=>t.shop=t.shop||[]);save();draw();alert('Backup restored')}catch(x){alert('That file is not a valid backup')}};
 /* drag a place to another day */
 let drag=null;
 $('#app').addEventListener('pointerdown',e=>{
@@ -259,7 +270,7 @@ function home(){
     h+='<div class="card trip" style="--c:'+DC[i%DC.length]+'" onclick="open_(\''+t.id+'\')"><div class="t">'+flag(t)+' '+esc(t.name)+'</div><div class="mute">'+esc(t.dest||t.country)+' · '+t.days+' days'+(t.start?' · '+range(t):'')+'</div>'+
     '<div class="two"><span class="pill" style="--c:#6c5ce7">'+money(t,s)+'</span>'+(t.code!=='SGD'?'<span class="pill" style="--c:#00b8a9">≈ '+sgd(t,s)+'</span>':'')+'</div></div>';
   });
-  return h+'<button class="btn w" onclick="tripForm()">＋ New trip</button><button class="btn ghost w" style="margin-top:8px" onclick="rateForm()">💱 Exchange rates (monthly average → SGD)</button>';
+  return h+'<button class="btn w" onclick="tripForm()">＋ New trip</button><button class="btn ghost w" style="margin-top:8px" onclick="rateForm()">💱 Exchange rates (monthly average → SGD)</button><button class="btn ghost w" style="margin-top:8px" onclick="backup()">⬇️ Back up my data</button><button class="btn ghost w" style="margin-top:8px" onclick="$('#file3').click()">⬆️ Restore from backup</button>';
 }
 function tripView(t){
   let h='<div class="top"><button class="ic" onclick="cur=null;draw()">‹ Back</button><h1>'+flag(t)+' '+esc(t.name)+'</h1><button class="ic" onclick="tripForm(T())">Edit</button></div>';
